@@ -64,7 +64,7 @@ elif st.session_state.current_round < st.session_state.rounds:
         guess = st.text_input("Your Guess:")
         if guess:
             if guess.strip().lower() == current_canton.lower():
-                st.success(f"✅ Correct! You earned {st.session_state.pending_score} points.")
+                st.success(f"Correct! You earned {st.session_state.pending_score} points.")
                 st.session_state.score += st.session_state.pending_score
                 st.session_state.correct = True
     
