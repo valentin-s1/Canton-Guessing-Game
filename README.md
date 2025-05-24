@@ -5,9 +5,9 @@ This Python-based quiz game invites players to guess Swiss cantons based on vari
 
 ## Contributors
 - Valentin Schnellmann  
-- Noé
-- XX
-- XX
+- Noé Peterhans
+- Claudia Oberhänsli
+- Flamur Miskiqi
 
 ## 🛠️ How It Works
 - Players receive a randomly selected clue about a Swiss canton.
