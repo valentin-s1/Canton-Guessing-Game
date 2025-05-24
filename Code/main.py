@@ -120,3 +120,5 @@ else:
 # ------ To run the code -----
 # 1. Install streamlit: pip install streamlit
 # 2. type: streamlit run main.py 
+
+# new idea
