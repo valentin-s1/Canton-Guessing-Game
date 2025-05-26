@@ -3,6 +3,7 @@
 import streamlit as st
 import random
 import pandas as pd
+import time
 
 # ----- Simulierter Datensatz: Jeder Kanton hat 10 Fragen (Schwierigkeit 10 bis 1) -----
 cantons = [
@@ -25,6 +26,7 @@ for canton in cantons:
 df = pd.DataFrame(data)
 
 # ----- Session-Setup -----
+# ----- Session state init -----
 if "rounds" not in st.session_state:
     st.session_state.rounds = 0
     st.session_state.score = 0
@@ -34,8 +36,13 @@ if "rounds" not in st.session_state:
     st.session_state.pending_score = 10
     st.session_state.current_question = None
     st.session_state.correct = False
+    st.session_state.hints = []
+    st.session_state.attempts_left = 2
+    st.session_state.round_start_time = time.time()
+    st.session_state.round_finished = False
+    st.session_state.reveal_message = ""
 
-# ----- Spielstart: Auswahl der Rundenzahl -----
+# ----- Start screen -----
 if st.session_state.rounds == 0:
     st.title("🇨🇭 Canton Guessing Game")
     st.write("Choose number of rounds:")
@@ -45,56 +52,114 @@ if st.session_state.rounds == 0:
         st.session_state.round_cantons = random.sample(cantons, rounds)
         st.rerun()
 
-# ----- Aktuelle Spielrunde anzeigen -----
+# ----- Game round -----
 elif st.session_state.current_round < st.session_state.rounds:
+
+    # Reset guess input before rendering it again
+    input_key = f"guess_input_{st.session_state.current_round}"
+    if st.session_state.get("clear_guess", False):
+        st.session_state[input_key] = ""
+        st.session_state.clear_guess = False
+
     st.title(f"Round {st.session_state.current_round + 1} of {st.session_state.rounds}")
-    st.write(f"Current Score: {st.session_state.score}")
-    
+    st.write(f"Score: {st.session_state.score}")
+    st.write(f"Remaining attempts: {st.session_state.attempts_left}")
+    remaining_time = max(0, int(20 - (time.time() - st.session_state.round_start_time)))
+    st.write(f"⏳ Time remaining: {remaining_time} seconds")
+
     current_canton = st.session_state.round_cantons[st.session_state.current_round]
 
-    if st.session_state.current_question is None:
-        question_row = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
-        st.session_state.current_question = question_row
+    # Timeout check
+    if not st.session_state.round_finished and remaining_time == 0:
+        st.session_state.feedback_message = "⏱️ Time's up!"
+        st.session_state.round_finished = True
+        st.session_state.reveal_message = f"The correct answer was: {current_canton}"
 
-    st.subheader(f"Question (Difficulty {st.session_state.current_difficulty})")
-    st.write(st.session_state.current_question["question"])
+    # Load first hint if none yet
+    if not st.session_state.hints and not st.session_state.round_finished:
+        first_hint = df[
+            (df["canton"] == current_canton) &
+            (df["difficulty"] == st.session_state.current_difficulty)
+        ].iloc[0]
+        st.session_state.current_question = first_hint
+        st.session_state.hints.append(first_hint["question"])
 
-    col1, col2 = st.columns(2)
-    with col1:
-        guess = st.text_input("Your Guess:")
-        if guess:
-            if guess.strip().lower() == current_canton.lower():
-                st.success(f"Correct! You earned {st.session_state.pending_score} points.")
-                st.session_state.score += st.session_state.pending_score
-                st.session_state.correct = True
-    
-    with col2:
-        if st.button("Don't know / Next Hint"):
-            if st.session_state.current_difficulty > 1:
-                st.session_state.current_difficulty -= 1
-                st.session_state.pending_score -= 1
-                st.session_state.current_question = None
-            else:
-                st.warning(f"No more hints. The correct answer was: {current_canton}.")
-                st.session_state.correct = True
+    # Show all hints so far
+    st.subheader("Hints so far:")
+    for hint in st.session_state.hints:
+        st.write(f"- {hint}")
 
-    if st.session_state.correct:
-        if st.button("Next Round"):
-            st.session_state.current_round += 1
-            st.session_state.current_difficulty = 10
-            st.session_state.pending_score = 10
-            st.session_state.current_question = None
-            st.session_state.correct = False
-            st.rerun()
+    # Show feedback message (e.g., wrong guess, correct, time's up)
+    if "feedback_message" in st.session_state and st.session_state.feedback_message:
+        st.info(st.session_state.feedback_message)
 
-# ----- GAME END -----
+    if not st.session_state.round_finished:
+        col1, col2 = st.columns(2)
+
+        with col1:
+            guess = st.text_input("Your Guess:", key=input_key)
+            if guess:
+                if guess.strip().lower() == current_canton.lower():
+                    st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
+                    st.session_state.score += st.session_state.pending_score
+                    st.session_state.round_finished = True
+                    st.session_state.clear_guess = True
+                    st.rerun()
+                else:
+                    st.session_state.attempts_left -= 1
+                    st.session_state.clear_guess = True
+                    if st.session_state.attempts_left == 0:
+                        st.session_state.feedback_message = "❌ No attempts left."
+                        st.session_state.round_finished = True
+                        st.session_state.reveal_message = f"The correct answer was: {current_canton}"
+                    else:
+                        st.session_state.feedback_message = f"❌ Wrong guess. {st.session_state.attempts_left} attempt(s) left."
+                    st.rerun()
+
+        with col2:
+            if st.button("Next Hint"):
+                if st.session_state.current_difficulty > 1:
+                    st.session_state.current_difficulty -= 1
+                    st.session_state.pending_score -= 1
+
+                    next_hint = df[
+                        (df["canton"] == current_canton) &
+                        (df["difficulty"] == st.session_state.current_difficulty)
+                    ].iloc[0]
+
+                    st.session_state.current_question = next_hint
+                    st.session_state.hints.append(next_hint["question"])
+                    st.rerun()
+                else:
+                    st.warning("No more hints available.")
+
+    # If round is over
+    if st.session_state.round_finished:
+        st.info(st.session_state.reveal_message)
+        time.sleep(2)
+        st.session_state.current_round += 1
+        st.session_state.current_difficulty = 10
+        st.session_state.pending_score = 10
+        st.session_state.current_question = None
+        st.session_state.correct = False
+        st.session_state.hints = []
+        st.session_state.attempts_left = 2
+        st.session_state.round_start_time = time.time()
+        st.session_state.round_finished = False
+        st.session_state.reveal_message = ""
+        st.session_state.clear_guess = True
+        st.session_state.feedback_message = ""
+        st.rerun()
+
+# ----- Game end -----
 else:
     st.title("Game Over")
-    st.write(f"Total Score: {st.session_state.score} / {st.session_state.rounds * 10}")
+    st.write(f"🎉 Final Score: {st.session_state.score} / {st.session_state.rounds * 10}")
     if st.button("Play Again"):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
+
 
 
 # ----- Instructions -----
