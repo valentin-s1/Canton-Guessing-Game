@@ -4,6 +4,7 @@ import streamlit as st
 import random
 import pandas as pd
 import time
+from streamlit_autorefresh import st_autorefresh
 
 # ----- Simulierter Datensatz: Jeder Kanton hat 10 Fragen (Schwierigkeit 10 bis 1) -----
 cantons = [
@@ -41,6 +42,7 @@ if "rounds" not in st.session_state:
     st.session_state.round_start_time = time.time()
     st.session_state.round_finished = False
     st.session_state.reveal_message = ""
+    st.session_state.feedback_message = "" 
 
 # ----- Start screen -----
 if st.session_state.rounds == 0:
@@ -50,10 +52,15 @@ if st.session_state.rounds == 0:
     if st.button("Start Game"):
         st.session_state.rounds = rounds
         st.session_state.round_cantons = random.sample(cantons, rounds)
+        st.session_state.round_start_time = time.time() # start timer for the first round
         st.rerun()
 
 # ----- Game round -----
 elif st.session_state.current_round < st.session_state.rounds:
+    
+    # NEU: Automatisches Refresh-Intervall (1 Sekunde) für max. 45 Sekunden
+    if not st.session_state.round_finished:
+        st_autorefresh(interval=1000, limit=45, key="auto_refresh")
 
     # Reset guess input before rendering it again
     input_key = f"guess_input_{st.session_state.current_round}"
@@ -64,7 +71,7 @@ elif st.session_state.current_round < st.session_state.rounds:
     st.title(f"Round {st.session_state.current_round + 1} of {st.session_state.rounds}")
     st.write(f"Score: {st.session_state.score}")
     st.write(f"Remaining attempts: {st.session_state.attempts_left}")
-    remaining_time = max(0, int(20 - (time.time() - st.session_state.round_start_time)))
+    remaining_time = max(0, int(45 - (time.time() - st.session_state.round_start_time)))
     st.write(f"⏳ Time remaining: {remaining_time} seconds")
 
     current_canton = st.session_state.round_cantons[st.session_state.current_round]
@@ -184,6 +191,7 @@ else:
 
 # ------ To run the code -----
 # 1. Install streamlit: pip install streamlit
+# pip install streamlit-autorefresh
 # 2. type: streamlit run Code/main.py 
 
 # new idea
