@@ -4,35 +4,32 @@ import random
 import time
 import pandas as pd
 
-# ----- Load hints from Excel -----
+# ----- Load game data from Excel file -----
 @st.cache_data
-def load_hint_data():
-    excel_path = "Code/data.xlsx"
-    df_raw = pd.read_excel(excel_path)
-
-    # Transform wide format to long format
+def load_hint_data(path="Code/data.xlsx"):
+    df_raw = pd.read_excel(path)
     long_data = []
     for _, row in df_raw.iterrows():
-        canton = row[0]
-        hints = row[1:]
-        available_hints = [h for h in hints if pd.notna(h) and h != "none"]
-        for i, hint in enumerate(reversed(available_hints)):
-            long_data.append({
-                "canton": canton,
-                "difficulty": 10 - i,
-                "question": hint
-            })
-
+        canton = row.iloc[0]
+        for i, (col_name, hint_value) in enumerate(row.iloc[1:].items()):
+            if pd.notna(hint_value) and str(hint_value).strip().lower() != "none":
+                difficulty = 10 - i  # First hint = difficulty 10
+                long_data.append({
+                    "canton": canton,
+                    "difficulty": difficulty,
+                    "question": f"{col_name}: {hint_value}"
+                })
     return pd.DataFrame(long_data)
 
-df = load_hint_data()
+# Load data from Excel
+df = load_hint_data("Code/data.xlsx")
 cantons = df["canton"].unique().tolist()
 
-# ----- Initialize leaderboard in-memory -----
+# ----- Leaderboard in session memory -----
 if "leaderboard" not in st.session_state:
     st.session_state.leaderboard = {}
 
-# ----- Initialize game state -----
+# ----- Initial state -----
 if "rounds" not in st.session_state:
     st.session_state.rounds = 0
     st.session_state.score = 0
@@ -57,19 +54,19 @@ if st.session_state.rounds == 0 and not st.session_state.game_started:
 
     with st.expander("ℹ️ Game Rules & How to Play"):
         st.markdown("""
-        **Objective:** Guess the correct canton based on hints.
+        **Objective:** Guess the correct canton based on up to 10 hints.
 
         - Select the number of rounds first.
-        - Then enter your name to start.
+        - Then enter your player name.
         - Each round starts with the hardest hint (worth 10 points).
-        - Click "Next Hint" to reveal easier hints (each hint reduces the score by 1).
+        - Click "Next Hint" to reveal easier clues (each costs 1 point).
         - You have **2 guess attempts** per round.
-        - Each round ends after 45 seconds or if both attempts are used.
+        - A round ends automatically after 45 seconds or 2 wrong guesses.
 
         **Leaderboard:**
-        - Only stores scores during this session.
-        - Reusing the same name will **overwrite** the previous score.
-        - Top 5 scores are shown below.
+        - Scores are tracked during this session.
+        - If you enter an existing name, your previous score will be overwritten.
+        - The leaderboard always shows the Top 5 scores.
         """)
 
     if st.session_state.leaderboard:
@@ -83,9 +80,9 @@ if st.session_state.rounds == 0 and not st.session_state.game_started:
         st.session_state.round_cantons = random.sample(cantons, rounds)
         st.rerun()
 
-# ----- Ask for username -----
+# ----- Name input -----
 elif not st.session_state.game_started:
-    st.title("Enter your name to start the game")
+    st.title("Enter your name")
     name = st.text_input("Username:")
     if name and st.button("Start Game"):
         st.session_state.username = name
@@ -93,11 +90,11 @@ elif not st.session_state.game_started:
         st.session_state.round_start_time = time.time()
         st.rerun()
 
-# ----- Game in progress -----
+# ----- Game logic -----
 elif st.session_state.current_round < st.session_state.rounds:
 
     if not st.session_state.round_finished:
-        st_autorefresh(interval=1000, limit=45, key="autorefresh")
+        st_autorefresh(interval=1000, limit=45, key="auto_refresh")
 
     input_key = f"guess_input_{st.session_state.current_round}"
     if st.session_state.get("clear_guess", False):
@@ -108,18 +105,18 @@ elif st.session_state.current_round < st.session_state.rounds:
     st.write(f"Player: {st.session_state.username}")
     st.write(f"Score: {st.session_state.score}")
     st.write(f"Attempts left: {st.session_state.attempts_left}")
-    remaining_time = max(0, int(45 - (time.time() - st.session_state.round_start_time)))
+
+    start_time = st.session_state.round_start_time or time.time()
+    remaining_time = max(0, int(45 - (time.time() - start_time)))
     st.write(f"⏳ Time remaining: {remaining_time} seconds")
 
     current_canton = st.session_state.round_cantons[st.session_state.current_round]
 
-    # Timeout check
     if not st.session_state.round_finished and remaining_time == 0:
         st.session_state.feedback_message = "⏱️ Time's up!"
         st.session_state.round_finished = True
         st.session_state.reveal_message = f"The correct answer was: {current_canton}"
 
-    # Load first hint
     if not st.session_state.hints and not st.session_state.round_finished:
         row = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
         st.session_state.current_question = row
@@ -160,13 +157,9 @@ elif st.session_state.current_round < st.session_state.rounds:
                 if st.session_state.current_difficulty > 1:
                     st.session_state.current_difficulty -= 1
                     st.session_state.pending_score -= 1
-                    next_hint = df[
-                        (df["canton"] == current_canton) &
-                        (df["difficulty"] == st.session_state.current_difficulty)
-                    ]
-                    if not next_hint.empty:
-                        st.session_state.current_question = next_hint.iloc[0]
-                        st.session_state.hints.append(next_hint.iloc[0]["question"])
+                    next_hint = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
+                    st.session_state.current_question = next_hint
+                    st.session_state.hints.append(next_hint["question"])
                     st.rerun()
                 else:
                     st.warning("No more hints available.")
@@ -193,11 +186,13 @@ else:
     st.title("Game Over")
     final_score = st.session_state.score
     st.write(f"🎉 Final Score: {final_score} / {st.session_state.rounds * 10}")
+
     name = st.session_state.username
     st.session_state.leaderboard[name] = max(final_score, st.session_state.leaderboard.get(name, 0))
 
     if st.button("Play Again"):
-        prev_leaderboard = st.session_state.leaderboard.copy()
+        keys = list(st.session_state.keys())
+        leaderboard = st.session_state.leaderboard
         st.session_state.clear()
-        st.session_state.leaderboard = prev_leaderboard
+        st.session_state.leaderboard = leaderboard
         st.rerun()
