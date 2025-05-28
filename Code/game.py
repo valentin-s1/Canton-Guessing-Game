@@ -7,7 +7,7 @@ import pandas as pd
 
 # ----- Load game data from Excel file -----
 @st.cache_data
-def load_hint_data(path="Code/data.xlsx"):
+def load_hint_data(path="Code/data_new.xlsx"):
     df_raw = pd.read_excel(path)
     long_data = []
     for _, row in df_raw.iterrows():
@@ -23,7 +23,7 @@ def load_hint_data(path="Code/data.xlsx"):
     return pd.DataFrame(long_data)
 
 # Load data from Excel
-df = load_hint_data("Code/data.xlsx")
+df = load_hint_data("Code/data_new.xlsx")
 cantons = df["canton"].unique().tolist()
 
 # ----- Leaderboard in session memory -----
