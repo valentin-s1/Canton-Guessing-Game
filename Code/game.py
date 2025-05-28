@@ -136,7 +136,7 @@ elif st.session_state.current_round < st.session_state.rounds:
             guess = st.text_input("Your Guess:", key=input_key)
             if guess:
                 if guess.strip().lower() == current_canton.lower():
-                    st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
+                    st.session_state.feedback_message = f"✅ Correct great! You earned {st.session_state.pending_score} points."
                     st.session_state.score += st.session_state.pending_score
                     st.session_state.round_finished = True
                     st.session_state.clear_guess = True
