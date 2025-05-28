@@ -4,6 +4,8 @@ import random
 import time
 import pandas as pd
 
+pd.array
+
 # ----- Load game data from Excel file -----
 @st.cache_data
 def load_hint_data(path="Code/data.xlsx"):
