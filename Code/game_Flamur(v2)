@@ -768,3 +768,64 @@ def show_game_round(df):
                     next_hint = df[
                         (df["canton"] == current_canton) &
                         (df["difficulty"] == st.session_state.current
+                                            st.session_state.current_question = next_hint
+                    st.session_state.hints.append(next_hint["question"])
+                    st.rerun()
+                else:
+                    st.warning("No more hints available.")
+
+    # If round is over
+    if st.session_state.round_finished:
+        st.info(st.session_state.reveal_message)
+        time.sleep(2)
+        st.session_state.current_round += 1
+        st.session_state.current_difficulty = 10
+        st.session_state.pending_score = 10
+        st.session_state.current_question = None
+        st.session_state.correct = False
+        st.session_state.hints = []
+        st.session_state.attempts_left = 2
+        st.session_state.round_start_time = time.time()
+        st.session_state.round_finished = False
+        st.session_state.reveal_message = ""
+        st.session_state.clear_guess = True
+        st.session_state.feedback_message = ""
+        st.rerun()
+
+# Display end screen
+def show_end_screen():
+    st.title("Game Over")
+    st.write(f"🎉 Final Score: {st.session_state.score} / {st.session_state.rounds * 10}")
+    
+    # Display performance rating
+    percentage = (st.session_state.score / (st.session_state.rounds * 10)) * 100
+    if percentage >= 90:
+        st.success("🏆 Excellent! You're a Swiss canton expert!")
+    elif percentage >= 70:
+        st.success("👍 Great job! You know your Swiss geography well!")
+    elif percentage >= 50:
+        st.info("🤔 Good effort! Keep learning about Swiss cantons!")
+    else:
+        st.warning("📚 Time to brush up on your Swiss canton knowledge!")
+    
+    if st.button("Play Again"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
+
+# Main game function
+def run_game():
+    # Load data and generate questions
+    canton_data = load_canton_data()
+    df = generate_questions(canton_data)
+    
+    # Initialize session state
+    init_session_state()
+    
+    # Display appropriate screen based on game state
+    if st.session_state.rounds == 0:
+        show_start_screen(df)
+    elif st.session_state.current_round < st.session_state.rounds:
+        show_game_round(df)
+    else:
+        show_end_screen()
