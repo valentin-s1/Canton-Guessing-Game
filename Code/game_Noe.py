@@ -4,7 +4,7 @@ import random
 import time
 import pandas as pd
 
-
+#streamlit run Code/game_Noe.py
 # ----- Load game data from Excel file -----
 @st.cache_data
 def load_hint_data(path="Code/data_new_long_format.xlsx"):
@@ -151,7 +151,34 @@ elif st.session_state.current_round < st.session_state.rounds:
         with col2:
             if st.button("Next Hint"):
                 if st.session_state.current_difficulty > 1:
-                    # Fetch a random hint at the current difficulty
+                    # Track shown hints
+                    used = set(st.session_state.hints)
+
+                    # Filter unused hints at this difficulty
+                    available = df[
+                        (df["canton"] == current_canton) &
+                        (df["difficulty"] == st.session_state.current_difficulty)
+                    ]
+
+                    unused = available[
+                        ~available.apply(lambda r: f"{r['type']}: {r['hint']}" in used, axis=1)
+                    ]
+
+                    if not unused.empty:
+                        selected = unused.sample(1).iloc[0]
+                        st.session_state.current_question = selected
+                        st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
+                    else:
+                        # If no unique hints left, don't repeat
+                        st.warning("No more unique hints at this difficulty.")
+
+                    # Now reduce difficulty regardless
+                    st.session_state.current_difficulty -= 1
+                    st.session_state.pending_score -= 1
+                    st.rerun()
+                else:
+                    st.warning("No more hints available.")
+        # Fetch a random hint at the current difficulty
                     possible_hints = df[
                         (df["canton"] == current_canton) &
                         (df["difficulty"] == st.session_state.current_difficulty)
@@ -165,7 +192,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                 st.session_state.current_difficulty -= 1
                 st.session_state.pending_score -= 1
                 st.rerun()
-            else:
+            elif st.button("Next Hint"):
                 st.warning("No more hints available.")
 
     if st.session_state.round_finished:
