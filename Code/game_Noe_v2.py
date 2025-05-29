@@ -224,7 +224,7 @@ else:
         st.session_state.leaderboard = leaderboard
         st.rerun()
 
-#streamlit run Code/game_Noe.py
+#streamlit run Code/game_Noe_v2.py
 
 #In order to run now you need to put this into terminal first:
 #pip install rapidfuzz
