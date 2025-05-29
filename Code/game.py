@@ -127,7 +127,10 @@ elif st.session_state.current_round < st.session_state.rounds:
         st.write(f"- {hint}")
 
     if st.session_state.feedback_message:
-        st.info(st.session_state.feedback_message)
+        if "✅" in st.session_state.feedback_message:
+            st.success(st.session_state.feedback_message)  # Grüne Box
+        else:
+            st.error(st.session_state.feedback_message)    # Rote Box
 
     if not st.session_state.round_finished:
         col1, col2 = st.columns(2)
@@ -184,7 +187,6 @@ elif st.session_state.current_round < st.session_state.rounds:
         st.session_state.clear_guess = True
         st.session_state.feedback_message = ""
         st.rerun()
-
 # ----- Game end -----
 else:
     st.title("Game Over")
