@@ -5,6 +5,7 @@ import time
 import pandas as pd
 
 #streamlit run Code/game_Noe.py
+
 # ----- Load game data from Excel file -----
 @st.cache_data
 def load_hint_data(path="Code/data_new_long_format.xlsx"):
@@ -174,7 +175,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                     # Step down difficulty regardless
                         st.session_state.current_difficulty -= 1
                         st.session_state.pending_score -= 1
-                        st.rerun()
+                        
                 else:
                     st.warning("No more hints available.")
 
