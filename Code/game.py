@@ -136,7 +136,7 @@ elif st.session_state.current_round < st.session_state.rounds:
             guess = st.text_input("Your Guess:", key=input_key)
             if guess:
                 if guess.strip().lower() == current_canton.lower():
-                    st.session_state.feedback_message = f"✅ Correct great! You earned {st.session_state.pending_score} points."
+                    st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
                     st.session_state.score += st.session_state.pending_score
                     st.session_state.round_finished = True
                     st.session_state.clear_guess = True
@@ -154,15 +154,19 @@ elif st.session_state.current_round < st.session_state.rounds:
 
         with col2:
             if st.button("Next Hint"):
-                if st.session_state.current_difficulty > 1:
-                    st.session_state.current_difficulty -= 1
-                    st.session_state.pending_score -= 1
-                    next_hint = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
-                    st.session_state.current_question = next_hint
+                if st.session_state.current_difficulty < 10:
+                    st.session_state.current_difficulty += 1
+                    st.session_state.pending_score += 1
+                    next_hint = df[(df["canton"] == current_canton) & 
+                          (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
                     st.session_state.hints.append(next_hint["question"])
                     st.rerun()
                 else:
-                    st.warning("No more hints available.")
+                # Auto-advance when no more hints available
+                    st.session_state.round_finished = True
+                    st.session_state.feedback_message = "ℹ️ No more hints available."
+                    st.session_state.reveal_message = f"The correct answer was: {current_canton}"
+                    st.rerun()
 
     if st.session_state.round_finished:
         st.info(st.session_state.reveal_message)
