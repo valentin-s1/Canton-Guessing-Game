@@ -138,8 +138,8 @@ elif st.session_state.current_round < st.session_state.rounds:
                 if normalized_guess == normalized_answer:
                     correct = True
                 else:
-                    similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
-                    correct = similarity >= 80
+                    similarity = fuzz.partial_ratio(normalized_guess, normalized_answer)
+                    correct = similarity >= 70
 
                 if correct:
                     st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
