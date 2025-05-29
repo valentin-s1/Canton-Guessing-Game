@@ -11,8 +11,8 @@ def load_hint_data(path="Code/data_new_long_format.xlsx"):
     return df
 
 # TEMPORARY: Clear cache to force reload
-###st.cache_data.clear()
-###load_hint_data.clear()
+st.cache_data.clear()
+load_hint_data.clear()
 
 # Load data from Excel
 df = load_hint_data("Code/data_new_long_format.xlsx")
