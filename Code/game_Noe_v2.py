@@ -151,6 +151,8 @@ elif st.session_state.current_round < st.session_state.rounds:
 
         with col2:
             if st.button("Next Hint", key="next_hint_button"):
+                hint_found = False                              
+                
                 while st.session_state.current_difficulty > 1:
                     # Pick a random unused hint at the current difficulty
                     used_hints = set(st.session_state.hints)
@@ -170,16 +172,13 @@ elif st.session_state.current_round < st.session_state.rounds:
                         st.session_state.current_question = selected
                         st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
                         st.session_state.pending_score = max(1, st.session_state.current_difficulty)
-                        st.session_state.current_difficulty -= 1
+                        hint_found = True
                         break
-                    else:
-                        st.warning("No more unique hints at this difficulty.")
+                    
+                    # Drop difficulty and try again
+                    st.session_state.current_difficulty -= 1
 
-                    # Step down difficulty regardless
-                        st.session_state.current_difficulty -= 1
-                        st.session_state.pending_score -= 1
-            
-                else:
+                if not hint_found:
                     st.warning("No more hints available.")
 
     if st.session_state.round_finished:
