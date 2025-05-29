@@ -175,7 +175,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                     # Step down difficulty regardless
                         st.session_state.current_difficulty -= 1
                         st.session_state.pending_score -= 1
-                        
+                        st.rerun()
                 else:
                     st.warning("No more hints available.")
 
