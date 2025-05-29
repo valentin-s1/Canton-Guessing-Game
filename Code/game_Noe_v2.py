@@ -4,8 +4,6 @@ import random
 import time
 import pandas as pd
 
-#streamlit run Code/game_Noe.py
-
 # ----- Load game data from Excel file -----
 @st.cache_data
 def load_hint_data(path="Code/data_new_long_format.xlsx"):
@@ -173,6 +171,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                         st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
                         st.session_state.pending_score = max(1, st.session_state.current_difficulty)
                         hint_found = True
+                        st.rerun()
                         break
                     
                     # Drop difficulty and try again
@@ -213,3 +212,5 @@ else:
         st.session_state.clear()
         st.session_state.leaderboard = leaderboard
         st.rerun()
+
+#streamlit run Code/game_Noe.py
