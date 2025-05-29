@@ -7,23 +7,17 @@ import pandas as pd
 
 # ----- Load game data from Excel file -----
 @st.cache_data
-def load_hint_data(path="Code/data_new.xlsx"):
-    df_raw = pd.read_excel(path)
-    long_data = []
-    for _, row in df_raw.iterrows():
-        canton = row.iloc[0]
-        for i, (col_name, hint_value) in enumerate(row.iloc[1:].items()):
-            if pd.notna(hint_value) and str(hint_value).strip().lower() != "none":
-                difficulty = 10 - i  # First hint = difficulty 10
-                long_data.append({
-                    "canton": canton,
-                    "difficulty": difficulty,
-                    "question": f"{col_name}: {hint_value}"
-                })
-    return pd.DataFrame(long_data)
+def load_hint_data(path="Code/data_new_long_format.xlsx"):
+    df = pd.read_excel(path)
+    return df
+
+st.cache_data.clear()
+
+# TEMPORARY: Clear cache to force reload
+load_hint_data.clear()
 
 # Load data from Excel
-df = load_hint_data("Code/data_new.xlsx")
+df = load_hint_data("Code/data_new_long_format.xlsx")
 cantons = df["canton"].unique().tolist()
 
 # ----- Leaderboard in session memory -----
@@ -119,9 +113,11 @@ elif st.session_state.current_round < st.session_state.rounds:
         st.session_state.reveal_message = f"The correct answer was: {current_canton}"
 
     if not st.session_state.hints and not st.session_state.round_finished:
-        row = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
-        st.session_state.current_question = row
-        st.session_state.hints.append(row["question"])
+        hint_rows = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)]
+        if not hint_rows.empty:
+            row = hint_rows.sample(1).iloc[0]  # randomly choose one if multiple at same difficulty
+            st.session_state.current_question = row
+            st.session_state.hints.append(f"{row['type']}: {row['hint']}")
 
     st.subheader("Hints so far:")
     for hint in st.session_state.hints:
