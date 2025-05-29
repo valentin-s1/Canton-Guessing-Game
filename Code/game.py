@@ -162,7 +162,11 @@ elif st.session_state.current_round < st.session_state.rounds:
                     st.session_state.hints.append(next_hint["question"])
                     st.rerun()
                 else:
-                    st.warning("No more hints available.")
+                # Auto-advance when no more hints available
+                    st.session_state.round_finished = True
+                    st.session_state.feedback_message = "ℹ️ No more hints available."
+                    st.session_state.reveal_message = f"The correct answer was: {current_canton}"
+                    st.rerun()
 
     if st.session_state.round_finished:
         st.info(st.session_state.reveal_message)
