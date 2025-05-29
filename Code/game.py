@@ -154,11 +154,11 @@ elif st.session_state.current_round < st.session_state.rounds:
 
         with col2:
             if st.button("Next Hint"):
-                if st.session_state.current_difficulty < 10:
-                    st.session_state.current_difficulty += 1
-                    st.session_state.pending_score += 1
-                    next_hint = df[(df["canton"] == current_canton) & 
-                          (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
+                if st.session_state.current_difficulty > 1:
+                    st.session_state.current_difficulty -= 1
+                    st.session_state.pending_score -= 1
+                    next_hint = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
+                    st.session_state.current_question = next_hint
                     st.session_state.hints.append(next_hint["question"])
                     st.rerun()
                 else:
