@@ -3,6 +3,7 @@ from streamlit_autorefresh import st_autorefresh
 import random
 import time
 import pandas as pd
+from rapidfuzz import fuzz
 
 # ----- Load game data from Excel file -----
 @st.cache_data
@@ -129,8 +130,18 @@ elif st.session_state.current_round < st.session_state.rounds:
 
         with col1:
             guess = st.text_input("Your Guess:", key=input_key)
+            #hybrid approach of combining exact and fuzzy matching (levenshtein)
             if guess:
-                if guess.strip().lower() == current_canton.lower():
+                normalized_guess = guess.strip().lower()
+                normalized_answer = current_canton.lower()
+
+                if normalized_guess == normalized_answer:
+                    correct = True
+                else:
+                    similarity = fuzz.ratio(normalized_guess, normalized_answer)
+                    correct = similarity >= 90
+
+                if correct:
                     st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
                     st.session_state.score += st.session_state.pending_score
                     st.session_state.round_finished = True
@@ -214,3 +225,6 @@ else:
         st.rerun()
 
 #streamlit run Code/game_Noe.py
+
+In order to run now you need to put this into terminal first:
+#pip install rapidfuzz
