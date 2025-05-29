@@ -138,8 +138,8 @@ elif st.session_state.current_round < st.session_state.rounds:
                 if normalized_guess == normalized_answer:
                     correct = True
                 else:
-                    similarity = fuzz.ratio(normalized_guess, normalized_answer)
-                    correct = similarity >= 90
+                    similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
+                    correct = similarity >= 80
 
                 if correct:
                     st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
@@ -226,5 +226,8 @@ else:
 
 #streamlit run Code/game_Noe.py
 
-In order to run now you need to put this into terminal first:
+#In order to run now you need to put this into terminal first:
 #pip install rapidfuzz
+
+#clearing cache:
+#streamlit cache clear
