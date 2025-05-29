@@ -11,10 +11,9 @@ def load_hint_data(path="Code/data_new_long_format.xlsx"):
     df = pd.read_excel(path)
     return df
 
-st.cache_data.clear()
-
 # TEMPORARY: Clear cache to force reload
-load_hint_data.clear()
+###st.cache_data.clear()
+###load_hint_data.clear()
 
 # Load data from Excel
 df = load_hint_data("Code/data_new_long_format.xlsx")
@@ -152,14 +151,22 @@ elif st.session_state.current_round < st.session_state.rounds:
         with col2:
             if st.button("Next Hint"):
                 if st.session_state.current_difficulty > 1:
-                    st.session_state.current_difficulty -= 1
-                    st.session_state.pending_score -= 1
-                    next_hint = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)].iloc[0]
-                    st.session_state.current_question = next_hint
-                    st.session_state.hints.append(next_hint["question"])
-                    st.rerun()
-                else:
-                    st.warning("No more hints available.")
+                    # Fetch a random hint at the current difficulty
+                    possible_hints = df[
+                        (df["canton"] == current_canton) &
+                        (df["difficulty"] == st.session_state.current_difficulty)
+                    ]
+                if not possible_hints.empty:
+                    selected_hint = possible_hints.sample(1).iloc[0]
+                    st.session_state.current_question = selected_hint
+                    st.session_state.hints.append(f"{selected_hint['type']}: {selected_hint['hint']}")
+
+                # Step down to next easier level
+                st.session_state.current_difficulty -= 1
+                st.session_state.pending_score -= 1
+                st.rerun()
+            else:
+                st.warning("No more hints available.")
 
     if st.session_state.round_finished:
         st.info(st.session_state.reveal_message)
