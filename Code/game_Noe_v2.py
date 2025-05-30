@@ -117,6 +117,8 @@ elif st.session_state.current_round < st.session_state.rounds:
             row = hint_rows.sample(1).iloc[0]  # randomly choose one if multiple at same difficulty
             st.session_state.current_question = row
             st.session_state.hints.append(f"{row['type']}: {row['hint']}")
+            # After showing the first hint, drop difficulty to avoid duplicate
+            st.session_state.current_difficulty -= 1
 
     st.subheader("Hints so far:")
     for hint in st.session_state.hints:
@@ -180,7 +182,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                         selected = unused_hints.sample(1).iloc[0]
                         st.session_state.current_question = selected
                         st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
-                        st.session_state.pending_score = max(1, st.session_state.current_difficulty)
+                        st.session_state.pending_score = max(1, st.session_state.pending_score - 1)
                         hint_found = True
                         st.rerun()
                         break
@@ -224,7 +226,7 @@ else:
         st.session_state.leaderboard = leaderboard
         st.rerun()
 
-#streamlit run Code/game_Noe.py
+#streamlit run Code/game_Noe_v2.py
 
 #In order to run now you need to put this into terminal first:
 #pip install rapidfuzz
