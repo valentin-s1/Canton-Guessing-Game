@@ -32,8 +32,24 @@ This Python-based quiz game invites players to guess Swiss cantons based on vari
   - pandas is used to load and manipulate the hint data from an Excel file, making it easy to filter and access relevant clues.
   - rapidfuzz allows for fuzzy string matching, so user guesses with minor typos or close matches can still be considered correct.
 - Data: The file "data_new_long_format.xlsx" contains data about the cantons, including a column for the correct canton, the difficulty level of the hints, the hint category, and the hint itself.
-- Our code has different parts
-  .....
+- Structure
+  1. Set-up
+     - Load Streamlit, pandas, rapidfuzz, and other utilities for UI, data handling, fuzzy matching, timing, and randomness.
+     - Load Game Data: Cached function to read canton hints from Excel into a DataFrame.
+     - Extract unique cantons list for the game.
+     - Initialize Leaderboard and Game State:
+     - Create session variables to track scores, rounds, current hints, guesses left, timing, and player info.
+  2. Start Screen:
+     - Display game title, instructions, leaderboard, and round number selection.
+  3. Name Input:
+     - Prompt user to enter their name before starting the game.
+  4. Gameplay:
+     - Show hints with adjustable difficulty.
+     - Accept guesses with fuzzy matching to handle typos.
+     - Manage attempts, scoring, countdown timer (45 seconds per round), and feedback.
+     - Transition rounds automatically when done.
+  5. Game Over:
+     - Show final score, update leaderboard with best score, and allow replay while preserving leaderboard.
 
 ## Work procedure
 - We used iterative testing to identify and fix issues throughout development.
@@ -41,7 +57,3 @@ This Python-based quiz game invites players to guess Swiss cantons based on vari
 - Or we also adjusted the scoring system to fairly reflect hint difficulty and attempts used.
 - Repeated testing helped us balance gameplay and improve user experience.
 
-
-
-
-ETCCCCCC
