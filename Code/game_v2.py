@@ -185,39 +185,64 @@ elif st.session_state.current_round < st.session_state.rounds:
 
                 # ----- Column 2: Ask for next hint -----
         with col2:
-            if st.button("Next Hint", key="next_hint_button"):
-                hint_found = False
-                
-                # Decrease difficulty level by 1
-                st.session_state.current_difficulty -= 1
-                
-                while st.session_state.current_difficulty >= 1:
-                    # Only look for hints at the new, lower difficulty level
-                    used_hints = set(st.session_state.hints)
+    # Button to request the next hint
+    if st.button("Next Hint", key="next_hint_button"):
+        hint_found = False  # Flag to track whether a new hint was successfully added
 
-                    available_hints = df[
-                        (df["canton"] == current_canton) &
-                        (df["difficulty"] == st.session_state.current_difficulty)
-                    ]
-                    unused_hints = available_hints[
-                        ~available_hints.apply(lambda r: f"{r['type']}: {r['hint']}" in used_hints, axis=1)
-                    ]
+        # Reduce the difficulty level by 1 to ensure next hint is *easier* than the last
+        st.session_state.current_difficulty -= 1
 
-                    # If hint found, use it
-                    if not unused_hints.empty:
-                        selected = unused_hints.sample(1).iloc[0]
-                        st.session_state.current_question = selected
-                        st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
-                        st.session_state.pending_score = max(1, st.session_state.current_difficulty)
-                        hint_found = True
-                        st.rerun()
-                        break
+        # Loop to continue searching for a hint at lower difficulties if none are available at current level
+        while st.session_state.current_difficulty >= 1:
+            # Keep track of hints that have already been shown, so we don’t repeat them
+            used_hints = set(st.session_state.hints)
 
-                    # No hints found for current difficulty, try easier level
-                    st.session_state.current_difficulty -= 1
+            # Filter the full dataset to get hints:
+            # - for the current canton in this round
+            # - at the current (decreased) difficulty level
+            available_hints = df[
+                (df["canton"] == current_canton) &
+                (df["difficulty"] == st.session_state.current_difficulty)
+            ]
 
-                if not hint_found:
-                    st.warning("No more hints available.")
+            # Of these available hints, exclude the ones that have already been shown
+            unused_hints = available_hints[
+                ~available_hints.apply(
+                    lambda r: f"{r['type']}: {r['hint']}" in used_hints, axis=1
+                )
+            ]
+
+            # If we find any unused hints at this difficulty level:
+            if not unused_hints.empty:
+                # Randomly select one unused hint
+                selected = unused_hints.sample(1).iloc[0]
+
+                # Store the selected hint as the current question (can be used for analytics or logic later)
+                st.session_state.current_question = selected
+
+                # Append the formatted hint (e.g., "Geography: This canton is mountainous") to the list shown to the user
+                st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
+
+                # Update the score the user will receive if they guess correctly now.
+                # Score is equal to the current difficulty, but can't go below 1
+                st.session_state.pending_score = max(1, st.session_state.current_difficulty)
+
+                # Mark that a hint was successfully found so we don’t show a warning
+                hint_found = True
+
+                # Rerun the Streamlit app so the new hint is displayed immediately
+                st.rerun()
+
+                # Exit the loop since we found a suitable hint
+                break
+
+            # If no unused hint was found at this level, go one level easier and try again
+            st.session_state.current_difficulty -= 1
+
+        # If no hints were found at any easier difficulty levels, show a warning to the player
+        if not hint_found:
+            st.warning("No more hints available.")
+
 
     # ======= END OF ROUND: show answer and transition =======
     if st.session_state.round_finished:
