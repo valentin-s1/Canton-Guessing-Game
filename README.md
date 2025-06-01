@@ -1,13 +1,10 @@
 # 🇨🇭 Guess the Canton – A Swiss Canton Guessing Game
 
 ## Project Overview
-This Python-based quiz game invites players to guess Swiss cantons based on various hints such as population size, capital city, language, or geographic region. The game is text-based, interactive, and designed for casual learning and entertainment.
+A Python-based quiz game to guess Swiss cantons based on various hints such as population size, capital city, language, or geographic region. 
+The game is text-based, interactive, and designed for casual learning and entertainment.
+This repository serves as the **submission of the mandatory group project for course "8,789,1 | Skills: Programming with Advanced Computer Languages" taught by Dr. Mario Silic at the University of St.Gallen in the fall semester of 2024.**
 
-## Contributors
-- Valentin Schnellmann  21-610-084
-- Noé Peterhans ....
-- Claudia Oberhänsli 20-722-468
-- Flamur Miskiqi 17-602-269
 
 ## How It Works
 - Players can choose the number of rounds (4,8,or 12) and enter the name (for Leaderboard)
@@ -22,7 +19,7 @@ This Python-based quiz game invites players to guess Swiss cantons based on vari
 - Once all rounds are played, the leaderboard is displayed, and the game can be played again.
 
 
-## Code
+## Code Description
 - Programming Language: Python
 - Main Packages: streamlit, streamlit_autorefresh, random, time, pandas and rapidfuzz
   - Streamlit is used to build the interactive web interface of the app, allowing users to interact with the game directly in their browser.
@@ -56,4 +53,36 @@ This Python-based quiz game invites players to guess Swiss cantons based on vari
 - For example we noticed that minor typos in canton names caused correct answers to be marked wrong. We then integrated the rapidfuzz package for fuzzy matching to allow close-but-not-exact guesses (≥70% similarity).
 - Or we also adjusted the scoring system to fairly reflect hint difficulty and attempts used.
 - Repeated testing helped us balance gameplay and improve user experience.
+
+
+## Prerequisites
+
+```bash
+pip install streamlit streamlit-autorefresh rapidfuzz
+```
+
+Clone this repository onto your local drive with [git](https://git-scm.com/).
+
+```bash
+git clone https://github.com/valentin-s1/Canton-Guessing-Game
+```
+
+## Usage
+
+To run the game, simply navigate to the folder containing the source code and execute [runner.py](https://github.com/valentin-s1/Canton-Guessing-Game/Code/game_Noe_v3.py).
+
+``` bash
+cd .../tictactoe 
+streamlit run Code/game_Noe_v3.py
+```
+
+Consequently, a game window opens where the user can click the corresponding buttons and tiles to play the game. 
+
+## Authors
+
+- Valentin Schnellmann  21-610-084
+- Noé Peterhans ....
+- Claudia Oberhänsli 20-722-468
+- Flamur Miskiqi 17-602-269
+
 
