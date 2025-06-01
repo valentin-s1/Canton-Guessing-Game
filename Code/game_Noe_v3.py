@@ -8,13 +8,13 @@ from rapidfuzz import fuzz  # Used for fuzzy matching to allow minor typos in us
 
 # ----- Load game data from Excel file -----
 @st.cache_data  # Caches the data so it's not reloaded on every interaction
-def load_hint_data(path="Code/data_new_long_format.xlsx"):
+def load_hint_data(path="Data/data_new_long_format.xlsx"):
     """Reads the Excel file containing canton hints and returns it as a DataFrame."""
     df = pd.read_excel(path)
     return df
 
 # Load the data and extract a unique list of cantons
-df = load_hint_data("Code/data_new_long_format.xlsx")
+df = load_hint_data("Data/data_new_long_format.xlsx")
 cantons = df["canton"].unique().tolist()
 
 # ----- Initialize leaderboard -----
