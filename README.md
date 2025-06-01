@@ -26,12 +26,12 @@ This repository serves as the **submission of the mandatory group project for co
 
 - **Language**: Python
 - **Main Packagees**:
-  - `streamlit`: Builds the interactive web app, allowing users to interact witht he game directly in their browser.
-  - `streamlit_autorefresh`: Enables automatic refreshing the page, which is used for updating the countdown timer in real time.
-  - `random`: Built-in Python module used to randomly select cantons and hints, making each game session unique.
-  - `time`: Tracks countdowns and ensuring the game enforces a time limit.
+  - `streamlit`: Builds the interactive web app, allowing users to interact witht he game directly in their browser
+  - `streamlit_autorefresh`: Enables automatic refreshing the page, which is used for updating the countdown timer in real time
+  - `random`: Built-in Python module used to randomly select cantons and hints, making each game session unique
+  - `time`: Tracks countdowns and ensuring the game enforces a time limit
   - `pandas`: Used to load and filter the data from Excel
-  - `rapidfuzz`: Allows fuzzy mathcing to tolerate small typos in user input.
+  - `rapidfuzz`: Allows fuzzy mathcing to tolerate small typos in user input
 
 ---
 
@@ -51,7 +51,7 @@ The game runs throguh four main stages, with persistent variables managed using 
 
 #### 1. Set-up and Initialization
 - Imports necessary modules and deines a cached data loader
-- Loades the Excel data into a DataFrame and extracts all unique cantons.
+- Loades the Excel data into a DataFrame and extracts all unique cantons
 - Initialize Leaderboard to track top scores
 - Initializes session variables:
   - Score and round tracking
@@ -73,8 +73,8 @@ The game runs throguh four main stages, with persistent variables managed using 
   - Offers the option to request new hints (easier ones, i.e. reducing possible score)
   - Allows two guesses per round
   - Includes a real-time countdown (45 sec per round)
-- Input is checked using fuzxx string matching (> 85% similarity --> to ensure correct answers even with typos)
-- After a correc guess, time-out, or two failed attempts:
+- Input is checked using fuzzy string matching (> 85% similarity --> to ensure correct answers even with typos)
+- After a correct guess, time-out, or two failed attempts:
   - The round ends with feedback and the correct answer (if wrong/time-out)
   - The next round begins automatically after 2 seconds
  
@@ -86,10 +86,10 @@ The game runs throguh four main stages, with persistent variables managed using 
 ---
 
 ## Work procedure
-- We used iterative testing to identify and fix issues throughout development.
-- For example we noticed that minor typos in canton names caused correct answers to be marked wrong. We then integrated the rapidfuzz package for fuzzy matching to allow close-but-not-exact guesses (≥85% similarity).
-- Or we also adjusted the scoring system to fairly reflect hint difficulty and attempts used.
-- Repeated testing helped us balance gameplay and improve user experience.
+- We used iterative testing to identify and fix issues throughout development
+- For example we noticed that minor typos in canton names caused correct answers to be marked wrong. We then integrated the rapidfuzz package for fuzzy matching to allow close-but-not-exact guesses (≥85% similarity)
+- Or we also adjusted the scoring system to fairly reflect hint difficulty and attempts used
+- Repeated testing helped us balance gameplay and improve user experience
 
 ---
 
