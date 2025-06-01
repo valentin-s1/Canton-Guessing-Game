@@ -9,7 +9,7 @@ This repository serves as the **submission of the mandatory group project for co
 
 #### How It Works
 
-- Players can choose the number of rounds (4,8,or 12) and enter the name (for Leaderboard)
+- Players can choose the number of rounds (4, 8, or 12) and enter the name (for Leaderboard)
 - Each round, a hidden canton is randomly selected.
 - It starts with one hard hint (worth 10 points) when clicking "Next hint" the user gets an easier clue (each costs 1 point)
 - The player has 2 attempts and 45 seconds to guess
