@@ -9,16 +9,16 @@ This repository serves as the **submission of the mandatory group project for co
 
 #### How It Works
 
-- Players can choose the number of rounds (4, 8, or 12) and enter the name (for Leaderboard)
-- Each round, a hidden canton is randomly selected.
-- It starts with one hard hint (worth 10 points) when clicking "Next hint" the user gets an easier clue (each costs 1 point)
-- The player has 2 attempts and 45 seconds to guess
-- Input is checked ussing fuzzy matching (>85% similarity is correct)
-- Correct guesses earn the remaining points.
-- Wrong guesses reduce attempts or end the round.
-- Your score accumulates across rounds and at the end, your final score is shown.
-- The leaderboard is updated with your best score (by name).
-- Once all rounds are played, the leaderboard is displayed, and the game can be played again.
+- Players can choose the number of rounds (4, 8, or 12) and enter their name (for Leaderboard)
+- Each round, a hidden canton is randomly selected
+- It starts with one hard hint (worth 10 points) when clicking "Next hint" the user gets an easier clue (each new hint deducts 1 point of players score)
+- The player has 2 attempts and 45 seconds to guess for each round
+- Input is checked using exact and fuzzy matching (>85% similarity is correct)
+- Correct guesses earn the remaining points
+- Wrong guesses reduce attempts or end the round
+- Your score accumulates across rounds and at the end, your final score is shown
+- The leaderboard is updated with your best score (by name)
+- Once all rounds are played, the leaderboard is displayed, and the game can be played again
 
 ---
 
