@@ -29,7 +29,7 @@ def initialize_game_state():
     st.session_state.score = 0 
     st.session_state.current_round = 0 
     st.session_state.round_cantons = []
-    st.session_state.all_hints = {}  # New: Stores all hints for current game
+    st.session_state.all_hints = {}  # Stores all hints for current game
     
     # Round level variables
     st.session_state.current_difficulty = 10  
@@ -173,14 +173,20 @@ elif st.session_state.current_round < st.session_state.rounds:
                     st.session_state.round_finished = True
                     st.rerun()
                 else:
-                    # Handle incorrect guess
+                    # Handle incorrect guess - decrement attempts
                     st.session_state.attempts_left -= 1
-                    if st.session_state.attempts_left <= 0:  # Changed to <= 0 for safety
+                    
+                    # Clear the input field for next attempt
+                    st.session_state[f"guess_{st.session_state.current_round}"] = ""
+                    
+                    # Check if attempts are exhausted
+                    if st.session_state.attempts_left == 0:
                         st.session_state.feedback_message = "❌ No attempts left."
                         st.session_state.round_finished = True
                         st.session_state.reveal_message = f"The correct answer was: {current_canton}"
                     else:
                         st.session_state.feedback_message = f"❌ Wrong guess. {st.session_state.attempts_left} attempt(s) left."
+                    
                     st.rerun()
 
         # ----- Column 2: Ask for next hint -----
