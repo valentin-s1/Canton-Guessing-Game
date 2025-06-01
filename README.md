@@ -1,4 +1,4 @@
-# 🇨🇭 Guess the Canton – A Swiss Canton Guessing Game
+# Guess the Canton – A Swiss Canton Guessing Game
 
 ## Project Overview
 
@@ -26,12 +26,12 @@ This repository serves as the **submission of the mandatory group project for co
 
 - **Language**: Python
 - **Main Packagees**:
-  - 'streamlit': Builds the interactive web app, allowing users to interact witht he game directly in their browser.
-  - 'streamlit_autorefresh': Enables automatic refreshing the page, which is used for updating the countdown timer in real time.
-  - 'random': Built-in Python module used to randomly select cantons and hints, making each game session unique.
-  - 'time': Tracks countdowns and ensuring the game enforces a time limit.
-  - 'pandas': Used to load and filter the data from Excel
-  - 'rapidfuzz': Allows fuzzy mathcing to tolerate small typos in user input.
+  - `streamlit`: Builds the interactive web app, allowing users to interact witht he game directly in their browser.
+  - `streamlit_autorefresh`: Enables automatic refreshing the page, which is used for updating the countdown timer in real time.
+  - `random`: Built-in Python module used to randomly select cantons and hints, making each game session unique.
+  - `time`: Tracks countdowns and ensuring the game enforces a time limit.
+  - `pandas`: Used to load and filter the data from Excel
+  - `rapidfuzz`: Allows fuzzy mathcing to tolerate small typos in user input.
 
 ---
 
