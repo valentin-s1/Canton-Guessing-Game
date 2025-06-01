@@ -247,7 +247,3 @@ else:
         st.rerun()
 
 
-# Note: To run this game, use the following command in terminal:
-# streamlit run Code/game_Noe.py
-# First install required package: pip install rapidfuzz
-# To clear cache: streamlit cache clear
