@@ -4,7 +4,7 @@
 
 A Python-based quiz game to guess Swiss cantons based on various hints such as population size, capital city, language, or geographic region. 
 The game is text-based, interactive, and designed for casual learning and entertainment.
-This repository serves as the **submission of the mandatory group project for course "8,789,1 | Skills: Programming with Advanced Computer Languages" taught by Dr. Mario Silic at the University of St.Gallen in the fall semester of 2024.**
+This repository serves as the **submission of the mandatory group project for course "8,789,1 | Skills: Programming with Advanced Computer Languages" taught by Dr. Mario Silic at the University of St.Gallen in the spring semester of 2025.**
 
 
 #### How It Works
