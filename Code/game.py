@@ -146,76 +146,113 @@ elif st.session_state.current_round < st.session_state.rounds:
         st.info(st.session_state.feedback_message)
 
     # ======= PLAYER INPUT + ACTIONS =======
+    # This block handles user input during a quiz round — specifically, the user's guess and the response logic
     if not st.session_state.round_finished:
+        # Divide the UI into two columns for layout purposes
         col1, col2 = st.columns(2)
 
         # ----- Column 1: Guess input -----
         with col1:
+            # Display a text input box for the user to enter their guess
+            # The input is stored with a key to allow clearing/resetting later
             guess = st.text_input("Your Guess:", key=input_key)
 
+            # Proceed only if the user has entered something
             if guess:
-                # Normalize both guess and target to lowercase
+                # Normalize both guess and correct answer to lowercase and strip whitespace for robust comparison
                 normalized_guess = guess.strip().lower()
                 normalized_answer = current_canton.lower()
 
-                # Check exact match or fuzzy match ≥ 85%
+                # Determine whether the guess is correct
+                # First, check for an exact match
                 if normalized_guess == normalized_answer:
                     correct = True
                 else:
+                    # If not exact, compute fuzzy match score (token set ratio)
+                    # A score ≥ 85 is considered a correct match
                     similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
                     correct = similarity >= 85
 
+                # ======= CORRECT GUESS =======
                 if correct:
+                    # Show positive feedback to the user with points earned
                     st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
+                    # Add the score for this round to the total score
                     st.session_state.score += st.session_state.pending_score
+                    # Mark the round as finished so the app doesn’t allow more guesses for this round
                     st.session_state.round_finished = True
+                    # Clear the text input on rerun
                     st.session_state.clear_guess = True
+                    # Rerun the app so that changes are reflected immediately (feedback shown, inputs locked, etc.)
                     st.rerun()
+
+                # ======= INCORRECT GUESS =======
                 else:
-                    # Handle incorrect guess
+                    # Deduct one attempt
                     st.session_state.attempts_left -= 1
+                    # Clear the text input box on rerun
                     st.session_state.clear_guess = True
+
+                    # If no attempts remain, end the round and show the correct answer
                     if st.session_state.attempts_left == 0:
                         st.session_state.feedback_message = "❌ No attempts left."
                         st.session_state.round_finished = True
                         st.session_state.reveal_message = f"The correct answer was: {current_canton}"
                     else:
+                        # Otherwise, inform the player of the incorrect guess and how many tries are left
                         st.session_state.feedback_message = f"❌ Wrong guess. {st.session_state.attempts_left} attempt(s) left."
+                    # Rerun the app to immediately update the interface and feedback message
                     st.rerun()
 
                 # ----- Column 2: Ask for next hint -----
         with col2:
+            # Button to request the next hint
             if st.button("Next Hint", key="next_hint_button"):
-                hint_found = False
+                hint_found = False # Flag to track whether a new hint was successfully added
                 
-                # Decrease difficulty level by 1
+                # Reduce the difficulty level by 1 to ensure next hint is *easier* than the last
                 st.session_state.current_difficulty -= 1
-                
+
+                # Loop to continue searching for a hint at lower difficulties if none are available at current level
                 while st.session_state.current_difficulty >= 1:
-                    # Only look for hints at the new, lower difficulty level
+                    # Keep track of hints that have already been shown, so we don’t repeat them
                     used_hints = set(st.session_state.hints)
 
+                    # Filter the full dataset to get hints:
+                        # - for the current canton in this round
+                        # - at the current (decreased) difficulty level
                     available_hints = df[
                         (df["canton"] == current_canton) &
                         (df["difficulty"] == st.session_state.current_difficulty)
                     ]
+
+                    # Of these available hints, exclude the ones that have already been shown
                     unused_hints = available_hints[
                         ~available_hints.apply(lambda r: f"{r['type']}: {r['hint']}" in used_hints, axis=1)
                     ]
 
-                    # If hint found, use it
+                    # If we find any unused hints at this difficulty level:
                     if not unused_hints.empty:
+                        # Randomly select one unused hint
                         selected = unused_hints.sample(1).iloc[0]
+                        # Store the selected hint as the current question
                         st.session_state.current_question = selected
+                        # Append the formatted hint to the list shown to the user
                         st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
+                        # Update the score the user will receive if they guess correctly now.
+                        # Score is equal to the current difficulty, but can't go below 1
                         st.session_state.pending_score = max(1, st.session_state.current_difficulty)
+                        # Mark that a hint was successfully found so we don’t show a warning
                         hint_found = True
+                        # Rerun the Streamlit app so the new hint is displayed immediately
                         st.rerun()
+                        # Exit the loop after we found a suitable hint
                         break
 
-                    # No hints found for current difficulty, try easier level
+                    # If no unused hint was found at this level, go one level easier and try again
                     st.session_state.current_difficulty -= 1
 
+                # If no hints were found at any easier difficulty levels, show a warning to the player
                 if not hint_found:
                     st.warning("No more hints available.")
 
