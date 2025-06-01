@@ -41,12 +41,10 @@ if "rounds" not in st.session_state:
     st.session_state.round_finished = False 
 
     # Feedback initialization
-    st.session_state.correct = False
     st.session_state.reveal_message = "" 
     st.session_state.feedback_message = ""  
 
     # User session variables
-    st.session_state.clear_guess = False # Reset guess input box when 
     st.session_state.username = "" 
     st.session_state.game_started = False  
 
