@@ -109,7 +109,7 @@ git clone https:/github.com/valentin-s1/Canton-Guessing-Game
 
 ## Usage
 
-To run the game, simply navigate to the folder containing the source code and execute [game.py](https://github.com/valentin-s1/Canton-Guessing-Game/Code/game.py).
+To run the game, simply navigate to the folder containing the source code and execute [game.py](Code/game.py).
 
 ``` bash
 cd .../Canton-Guessing-Game 
