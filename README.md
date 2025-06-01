@@ -64,12 +64,12 @@ pip install streamlit streamlit-autorefresh rapidfuzz
 Clone this repository onto your local drive with [git](https://git-scm.com/).
 
 ```bash
-git clone https://github.com/valentin-s1/Canton-Guessing-Game
+git clone https:/github.com/valentin-s1/Canton-Guessing-Game
 ```
 
 ## Usage
 
-To run the game, simply navigate to the folder containing the source code and execute [runner.py](https://github.com/valentin-s1/Canton-Guessing-Game/Code/game_Noe_v3.py).
+To run the game, simply navigate to the folder containing the source code and execute [game_Noe_v3.py](https://github.com/valentin-s1/Canton-Guessing-Game/Code/game_Noe_v3.py).
 
 ``` bash
 cd .../tictactoe 
