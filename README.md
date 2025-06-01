@@ -4,12 +4,12 @@
 This Python-based quiz game invites players to guess Swiss cantons based on various hints such as population size, capital city, language, or geographic region. The game is text-based, interactive, and designed for casual learning and entertainment.
 
 ## Contributors
-- Valentin Schnellmann  ....
+- Valentin Schnellmann  21-610-084
 - Noé Peterhans ....
 - Claudia Oberhänsli 20-722-468
 - Flamur Miskiqi 17-602-269
 
-## 🛠️ How It Works
+## How It Works
 - Players can choose the number of rounds (4,8,or 12) and enter the name (for Leaderboard)
 - Each round, a hidden canton is randomly selected.
 - It starts with one hard hint (worth 10 points) when clicking "Next hint" the user gets an easier clue (each costs 1 point)
