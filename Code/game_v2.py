@@ -217,10 +217,10 @@ elif st.session_state.current_round < st.session_state.rounds:
                 # Randomly select one unused hint
                 selected = unused_hints.sample(1).iloc[0]
 
-                # Store the selected hint as the current question (can be used for analytics or logic later)
+                # Store the selected hint as the current question
                 st.session_state.current_question = selected
 
-                # Append the formatted hint (e.g., "Geography: This canton is mountainous") to the list shown to the user
+                # Append the formatted hint to the list shown to the user
                 st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
 
                 # Update the score the user will receive if they guess correctly now.
