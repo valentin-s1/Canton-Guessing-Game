@@ -21,35 +21,32 @@ cantons = df["canton"].unique().tolist()
 if "leaderboard" not in st.session_state:
     st.session_state.leaderboard = {}  # Keeps track of each user's highest score
 
-# ----- Game state initialization -----
-def initialize_game_state():
-    """Initialize or reset all game state variables"""
-    # Game progress tracking
+# ----- Initialize game state -----
+# Set default values for all session variables at the start of the game
+if "rounds" not in st.session_state:
+    # Game progress tracking (number, score, current round, etc.)
     st.session_state.rounds = 0 
     st.session_state.score = 0 
     st.session_state.current_round = 0 
-    st.session_state.round_cantons = []
-    st.session_state.all_hints = {}  # Stores all hints for current game
-    
-    # Round level variables
+    st.session_state.round_cantons = []  # List of cantons for current round (randomly selected, see below)
+
+    # Round level variables (difficulty, score, current hint, etc.)
     st.session_state.current_difficulty = 10  
     st.session_state.pending_score = 10 
+    st.session_state.current_question = None
+    st.session_state.correct = False
     st.session_state.hints = [] 
-    st.session_state.attempts_left = 2  # Players get 2 attempts per round
+    st.session_state.attempts_left = 2 
     st.session_state.round_start_time = None 
     st.session_state.round_finished = False 
-    
-    # Feedback messages
+
+    # Feedback initialization
     st.session_state.reveal_message = "" 
     st.session_state.feedback_message = ""  
-    
-    # User session
+
+    # User session variables
     st.session_state.username = "" 
     st.session_state.game_started = False  
-
-# Initialize if not already set
-if "rounds" not in st.session_state:
-    initialize_game_state()
 
 # =======================
 # STAGE 1: START SCREEN
@@ -83,12 +80,6 @@ if st.session_state.rounds == 0 and not st.session_state.game_started:
         st.session_state.rounds = rounds
         # Randomly choose the cantons to guess in this session
         st.session_state.round_cantons = random.sample(cantons, rounds)
-        # Pre-load all hints for these cantons for faster access during game
-        st.session_state.all_hints = {
-            canton: df[df["canton"] == canton].sort_values('difficulty', ascending=False)
-            .to_dict('records')
-            for canton in st.session_state.round_cantons
-        }
         st.rerun()
 
 # =======================
@@ -108,38 +99,42 @@ elif not st.session_state.game_started:
 # STAGE 3: GAMEPLAY
 # =======================
 elif st.session_state.current_round < st.session_state.rounds:
-    # Use autorefresh to make timer work (limited to 45 refreshes max)
+    # Use autorefresh to make timer work
     if not st.session_state.round_finished:
         st_autorefresh(interval=1000, limit=45, key="auto_refresh")
 
-    current_canton = st.session_state.round_cantons[st.session_state.current_round]
-    
+    # Reset guess input box if necessary
+    input_key = f"guess_input_{st.session_state.current_round}"
+    if st.session_state.get("clear_guess", False):
+        st.session_state[input_key] = ""
+        st.session_state.clear_guess = False
+
     # Show header and current status
     st.title(f"Round {st.session_state.current_round + 1} of {st.session_state.rounds}")
     st.write(f"Player: {st.session_state.username}")
     st.write(f"Score: {st.session_state.score}")
     st.write(f"Attempts left: {st.session_state.attempts_left}")
 
-    # Timer logic - more efficient calculation using saved start time
+    # Timer logic: show countdown from 45 seconds
     start_time = st.session_state.round_start_time or time.time()
     remaining_time = max(0, int(45 - (time.time() - start_time)))
     st.write(f"⏳ Time remaining: {remaining_time} seconds")
 
-    # Handle timeout
+    current_canton = st.session_state.round_cantons[st.session_state.current_round]
+
+    # If time runs out, end the round and reveal the answer
     if not st.session_state.round_finished and remaining_time == 0:
         st.session_state.feedback_message = "⏱️ Time's up!"
         st.session_state.round_finished = True
         st.session_state.reveal_message = f"The correct answer was: {current_canton}"
-        st.rerun()
 
-    # Load first hint if none shown yet (using pre-loaded hints)
+    # Load the first (hardest) hint if none shown yet
     if not st.session_state.hints and not st.session_state.round_finished:
-        # Get the hardest hint (difficulty 10) for current canton
-        available_hints = [h for h in st.session_state.all_hints[current_canton] 
-                          if h['difficulty'] == 10]
-        if available_hints:
-            hint = random.choice(available_hints)
-            st.session_state.hints.append(f"{hint['type']}: {hint['hint']}")
+        hint_rows = df[(df["canton"] == current_canton) & (df["difficulty"] == st.session_state.current_difficulty)]
+        if not hint_rows.empty:
+            row = hint_rows.sample(1).iloc[0]
+            st.session_state.current_question = row
+            st.session_state.hints.append(f"{row['type']}: {row['hint']}")
 
     # Display all hints shown so far
     st.subheader("Hints so far:")
@@ -156,74 +151,89 @@ elif st.session_state.current_round < st.session_state.rounds:
 
         # ----- Column 1: Guess input -----
         with col1:
-            # Using round number in key ensures fresh input each round
-            guess = st.text_input("Your Guess:", 
-                                key=f"guess_{st.session_state.current_round}")
+            guess = st.text_input("Your Guess:", key=input_key)
 
             if guess:
-                # Normalized comparison with fuzzy matching
+                # Normalize both guess and target to lowercase
                 normalized_guess = guess.strip().lower()
                 normalized_answer = current_canton.lower()
-                similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
-                correct = (normalized_guess == normalized_answer) or (similarity >= 85)
+
+                # Check exact match or fuzzy match ≥ 85%
+                if normalized_guess == normalized_answer:
+                    correct = True
+                else:
+                    similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
+                    correct = similarity >= 85
 
                 if correct:
                     st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
                     st.session_state.score += st.session_state.pending_score
                     st.session_state.round_finished = True
+                    st.session_state.clear_guess = True
                     st.rerun()
                 else:
-                    # Handle incorrect guess - decrement attempts
+                    # Handle incorrect guess
                     st.session_state.attempts_left -= 1
-                    
-                    # Clear the input field for next attempt
-                    st.session_state[f"guess_{st.session_state.current_round}"] = ""
-                    
-                    # Check if attempts are exhausted
+                    st.session_state.clear_guess = True
                     if st.session_state.attempts_left == 0:
                         st.session_state.feedback_message = "❌ No attempts left."
                         st.session_state.round_finished = True
                         st.session_state.reveal_message = f"The correct answer was: {current_canton}"
                     else:
                         st.session_state.feedback_message = f"❌ Wrong guess. {st.session_state.attempts_left} attempt(s) left."
-                    
                     st.rerun()
 
-        # ----- Column 2: Ask for next hint -----
+                # ----- Column 2: Ask for next hint -----
         with col2:
             if st.button("Next Hint", key="next_hint_button"):
-                # Get all unused hints that are easier than current difficulty
-                used_hint_texts = set(st.session_state.hints)
-                available_hints = [
-                    h for h in st.session_state.all_hints[current_canton]
-                    if h['difficulty'] < st.session_state.current_difficulty
-                    and f"{h['type']}: {h['hint']}" not in used_hint_texts
-                ]
+                hint_found = False
                 
-                if available_hints:
-                    # Select the most difficult remaining hint
-                    selected = max(available_hints, key=lambda x: x['difficulty'])
-                    st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
-                    st.session_state.current_difficulty = selected['difficulty']
-                    st.session_state.pending_score = max(1, selected['difficulty'])
-                    st.rerun()
-                else:
+                # Decrease difficulty level by 1
+                st.session_state.current_difficulty -= 1
+                
+                while st.session_state.current_difficulty >= 1:
+                    # Only look for hints at the new, lower difficulty level
+                    used_hints = set(st.session_state.hints)
+
+                    available_hints = df[
+                        (df["canton"] == current_canton) &
+                        (df["difficulty"] == st.session_state.current_difficulty)
+                    ]
+                    unused_hints = available_hints[
+                        ~available_hints.apply(lambda r: f"{r['type']}: {r['hint']}" in used_hints, axis=1)
+                    ]
+
+                    # If hint found, use it
+                    if not unused_hints.empty:
+                        selected = unused_hints.sample(1).iloc[0]
+                        st.session_state.current_question = selected
+                        st.session_state.hints.append(f"{selected['type']}: {selected['hint']}")
+                        st.session_state.pending_score = max(1, st.session_state.current_difficulty)
+                        hint_found = True
+                        st.rerun()
+                        break
+
+                    # No hints found for current difficulty, try easier level
+                    st.session_state.current_difficulty -= 1
+
+                if not hint_found:
                     st.warning("No more hints available.")
 
-    # ======= END OF ROUND: transition to next round =======
+    # ======= END OF ROUND: show answer and transition =======
     if st.session_state.round_finished:
         st.info(st.session_state.reveal_message)
-        time.sleep(2)  # Brief pause before next round
-        
-        # Reset round-specific variables
+        time.sleep(2)  # Wait 2 seconds before moving to next round
         st.session_state.current_round += 1
         st.session_state.current_difficulty = 10
         st.session_state.pending_score = 10
+        st.session_state.current_question = None
+        st.session_state.correct = False
         st.session_state.hints = []
-        st.session_state.attempts_left = 2  # Reset attempts for new round
+        st.session_state.attempts_left = 2
         st.session_state.round_start_time = time.time()
         st.session_state.round_finished = False
         st.session_state.reveal_message = ""
+        st.session_state.clear_guess = True
         st.session_state.feedback_message = ""
         st.rerun()
 
@@ -244,6 +254,6 @@ else:
     # Option to replay the game
     if st.button("Play Again"):
         leaderboard = st.session_state.leaderboard  # Save current leaderboard
-        initialize_game_state()  # Reset game using our function
+        st.session_state.clear()  # Reset game
         st.session_state.leaderboard = leaderboard  # Restore leaderboard
         st.rerun()
