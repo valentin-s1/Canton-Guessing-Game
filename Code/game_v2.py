@@ -35,7 +35,7 @@ def initialize_game_state():
     st.session_state.current_difficulty = 10  
     st.session_state.pending_score = 10 
     st.session_state.hints = [] 
-    st.session_state.attempts_left = 2 
+    st.session_state.attempts_left = 2  # Players get 2 attempts per round
     st.session_state.round_start_time = None 
     st.session_state.round_finished = False 
     
@@ -175,7 +175,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                 else:
                     # Handle incorrect guess
                     st.session_state.attempts_left -= 1
-                    if st.session_state.attempts_left == 0:
+                    if st.session_state.attempts_left <= 0:  # Changed to <= 0 for safety
                         st.session_state.feedback_message = "❌ No attempts left."
                         st.session_state.round_finished = True
                         st.session_state.reveal_message = f"The correct answer was: {current_canton}"
@@ -214,7 +214,7 @@ elif st.session_state.current_round < st.session_state.rounds:
         st.session_state.current_difficulty = 10
         st.session_state.pending_score = 10
         st.session_state.hints = []
-        st.session_state.attempts_left = 2
+        st.session_state.attempts_left = 2  # Reset attempts for new round
         st.session_state.round_start_time = time.time()
         st.session_state.round_finished = False
         st.session_state.reveal_message = ""
