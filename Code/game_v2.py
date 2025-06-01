@@ -146,42 +146,71 @@ elif st.session_state.current_round < st.session_state.rounds:
         st.info(st.session_state.feedback_message)
 
     # ======= PLAYER INPUT + ACTIONS =======
-    if not st.session_state.round_finished:
-        col1, col2 = st.columns(2)
+# This block handles user input during a quiz round — specifically, the user's guess and the response logic
 
-        # ----- Column 1: Guess input -----
-        with col1:
-            guess = st.text_input("Your Guess:", key=input_key)
+if not st.session_state.round_finished:
+    # Divide the UI into two columns for layout purposes
+    col1, col2 = st.columns(2)
 
-            if guess:
-                # Normalize both guess and target to lowercase
-                normalized_guess = guess.strip().lower()
-                normalized_answer = current_canton.lower()
+    # ----- Column 1: Guess input -----
+    with col1:
+        # Display a text input box for the user to enter their guess
+        # The input is stored with a key to allow clearing/resetting later
+        guess = st.text_input("Your Guess:", key=input_key)
 
-                # Check exact match or fuzzy match ≥ 85%
-                if normalized_guess == normalized_answer:
-                    correct = True
-                else:
-                    similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
-                    correct = similarity >= 85
+        # Proceed only if the user has entered something
+        if guess:
+            # Normalize both guess and correct answer to lowercase and strip whitespace for robust comparison
+            normalized_guess = guess.strip().lower()
+            normalized_answer = current_canton.lower()
 
-                if correct:
-                    st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
-                    st.session_state.score += st.session_state.pending_score
+            # Determine whether the guess is correct
+            # First, check for an exact match
+            if normalized_guess == normalized_answer:
+                correct = True
+            else:
+                # If not exact, compute fuzzy match score (token set ratio)
+                # A score ≥ 85 is considered a correct match
+                similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
+                correct = similarity >= 85
+
+            # ======= CORRECT GUESS =======
+            if correct:
+                # Show positive feedback to the user with points earned
+                st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
+
+                # Add the score for this round to the total score
+                st.session_state.score += st.session_state.pending_score
+
+                # Mark the round as finished so the app doesn’t allow more guesses for this round
+                st.session_state.round_finished = True
+
+                # Clear the text input on rerun
+                st.session_state.clear_guess = True
+
+                # Rerun the app so that changes are reflected immediately (feedback shown, inputs locked, etc.)
+                st.rerun()
+
+            # ======= INCORRECT GUESS =======
+            else:
+                # Deduct one attempt
+                st.session_state.attempts_left -= 1
+
+                # Clear the text input box on rerun
+                st.session_state.clear_guess = True
+
+                # If no attempts remain, end the round and show the correct answer
+                if st.session_state.attempts_left == 0:
+                    st.session_state.feedback_message = "❌ No attempts left."
                     st.session_state.round_finished = True
-                    st.session_state.clear_guess = True
-                    st.rerun()
+                    st.session_state.reveal_message = f"The correct answer was: {current_canton}"
                 else:
-                    # Handle incorrect guess
-                    st.session_state.attempts_left -= 1
-                    st.session_state.clear_guess = True
-                    if st.session_state.attempts_left == 0:
-                        st.session_state.feedback_message = "❌ No attempts left."
-                        st.session_state.round_finished = True
-                        st.session_state.reveal_message = f"The correct answer was: {current_canton}"
-                    else:
-                        st.session_state.feedback_message = f"❌ Wrong guess. {st.session_state.attempts_left} attempt(s) left."
-                    st.rerun()
+                    # Otherwise, just inform the player of the incorrect guess and how many tries are left
+                    st.session_state.feedback_message = f"❌ Wrong guess. {st.session_state.attempts_left} attempt(s) left."
+
+                # Rerun the app to immediately update the interface and feedback message
+                st.rerun()
+
 
                 # ----- Column 2: Ask for next hint -----
         with col2:
