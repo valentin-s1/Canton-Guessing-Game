@@ -1,10 +1,10 @@
 # ----- Import necessary libraries -----
 import streamlit as st  # Streamlit is used for creating the web app interface
 from streamlit_autorefresh import st_autorefresh  # Allows page to refresh automatically (for countdown timer)
-import random  # To randomly select cantons and hints
-import time  # To track how much time has passed in a round
-import pandas as pd  # To load and manipulate the hint data from Excel
-from rapidfuzz import fuzz  # Used for fuzzy matching to allow minor typos in user guesses
+import random
+import time 
+import pandas as pd 
+from rapidfuzz import fuzz  # for fuzzy string matching (to check guesses against canton names)
 
 # ----- Load game data from Excel file -----
 @st.cache_data  # Caches the data so it's not reloaded on every interaction
