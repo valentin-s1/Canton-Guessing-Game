@@ -37,7 +37,7 @@ This repository serves as the **submission of the mandatory group project for co
 
 ## Data Structure
 
-Game data is stored in 'data_new_long_format.xlsx'///////////, containing: 
+Game data is stored in [`data_new_long_format.xlsx`](Data/data_new_long_format.xlsx), containing:
 - canton: The correct answer for each hint
 - difficulty: Numeric difficulty level (1-10)
 - type: Hint category
@@ -109,11 +109,11 @@ git clone https:/github.com/valentin-s1/Canton-Guessing-Game
 
 ## Usage
 
-To run the game, simply navigate to the folder containing the source code and execute [game_Noe_v3.py](https://github.com/valentin-s1/Canton-Guessing-Game/Code/game_Noe_v3.py).
+To run the game, simply navigate to the folder containing the source code and execute [game.py](Code/game.py).
 
 ``` bash
 cd .../Canton-Guessing-Game 
-streamlit run Code/game_Noe_v3.py
+streamlit run Code/game.py
 ```
 
 Consequently, a game window opens where the user can click the corresponding buttons and tiles to play the game. 
