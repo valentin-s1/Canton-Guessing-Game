@@ -121,7 +121,7 @@ Consequently, a game window opens where the user can click the corresponding but
 
 ## Authors
 
-- Valentin Schnellmann  21-610-084
+- Valentin Schnellmann 21-610-084
 - Noé Peterhans 19-617-091
 - Claudia Oberhänsli 20-722-468
 - Flamur Miskiqi 17-602-269
