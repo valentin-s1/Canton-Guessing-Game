@@ -112,7 +112,7 @@ git clone https:/github.com/valentin-s1/Canton-Guessing-Game
 To run the game, simply navigate to the folder containing the source code and execute [game_Noe_v3.py](https://github.com/valentin-s1/Canton-Guessing-Game/Code/game_Noe_v3.py).
 
 ``` bash
-cd .../tictactoe 
+cd .../Canton-Guessing-Game 
 streamlit run Code/game_Noe_v3.py
 ```
 
