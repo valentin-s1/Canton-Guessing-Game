@@ -37,7 +37,8 @@ This repository serves as the **submission of the mandatory group project for co
 
 ## Data Structure
 
-Game data is stored in [`data_new_long_format.xlsx`](Data/data_new_long_format.xlsx), containing:
+The game uses a custom-built dataset  compiled by the authors and includes hints for all 26 Swiss cantons across multiple difficulty levels and categories.
+It is stored in [`data_new_long_format.xlsx`](Data/data_new_long_format.xlsx), containing:
 - canton: The correct answer for each hint
 - difficulty: Numeric difficulty level (1-10)
 - type: Hint category
