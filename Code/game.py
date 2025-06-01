@@ -183,14 +183,18 @@ elif st.session_state.current_round < st.session_state.rounds:
                         st.session_state.feedback_message = f"❌ Wrong guess. {st.session_state.attempts_left} attempt(s) left."
                     st.rerun()
 
-        # ----- Column 2: Ask for next hint -----
+                # ----- Column 2: Ask for next hint -----
         with col2:
             if st.button("Next Hint", key="next_hint_button"):
                 hint_found = False
-                while st.session_state.current_difficulty > 1:
+                
+                # Decrease difficulty level by 1
+                st.session_state.current_difficulty -= 1
+                
+                while st.session_state.current_difficulty >= 1:
+                    # Only look for hints at the new, lower difficulty level
                     used_hints = set(st.session_state.hints)
 
-                    # Get all hints of current difficulty not yet used
                     available_hints = df[
                         (df["canton"] == current_canton) &
                         (df["difficulty"] == st.session_state.current_difficulty)
@@ -208,6 +212,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                         hint_found = True
                         st.rerun()
                         break
+
                     # No hints found for current difficulty, try easier level
                     st.session_state.current_difficulty -= 1
 
