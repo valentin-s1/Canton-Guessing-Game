@@ -52,7 +52,7 @@ if "rounds" not in st.session_state:
 # STAGE 1: START SCREEN
 # =======================
 if st.session_state.rounds == 0 and not st.session_state.game_started:
-    st.title("🇨🇭 Canton Guessing Game")
+    st.title("CH Canton Guessing Game")
 
     # Expandable section with game instructions
     with st.expander("ℹ️ Game Rules & How to Play"):
