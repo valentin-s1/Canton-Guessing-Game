@@ -22,24 +22,33 @@ if "leaderboard" not in st.session_state:
     st.session_state.leaderboard = {}  # Keeps track of each user's highest score
 
 # ----- Initialize game state -----
-# This block ensures that all necessary session variables are defined before the game starts
+# Set default values for all session variables at the start of the game
 if "rounds" not in st.session_state:
-    st.session_state.rounds = 0  # Total number of rounds chosen by the player
-    st.session_state.score = 0  # Cumulative score across all rounds
-    st.session_state.current_round = 0  # Index of the current round
-    st.session_state.round_cantons = []  # Randomly chosen cantons for the session
-    st.session_state.current_difficulty = 10  # Difficulty starts high; lower values = easier hints
-    st.session_state.pending_score = 10  # The score the player will get if they guess correctly now
-    st.session_state.current_question = None  # Stores the current hint as a row from the DataFrame
-    st.session_state.correct = False  # Was the last guess correct?
-    st.session_state.hints = []  # Hints already shown in the current round
-    st.session_state.attempts_left = 2  # Each round allows 2 guesses
-    st.session_state.round_start_time = None  # When the current round began
-    st.session_state.round_finished = False  # Is this round over?
-    st.session_state.reveal_message = ""  # What to display when the answer is shown
-    st.session_state.feedback_message = ""  # Feedback shown to the user
-    st.session_state.username = ""  # User-entered name
-    st.session_state.game_started = False  # Has the user begun the game?
+    # Game progress tracking (number, score, current round, etc.)
+    st.session_state.rounds = 0 
+    st.session_state.score = 0 
+    st.session_state.current_round = 0 
+    st.session_state.round_cantons = []  # List of cantons for current round (randomly selected, see below)
+
+    # Round level variables (difficulty, score, current hint, etc.)
+    st.session_state.current_difficulty = 10  
+    st.session_state.pending_score = 10 
+    st.session_state.current_question = None
+    st.session_state.correct = False
+    st.session_state.hints = [] 
+    st.session_state.attempts_left = 2 
+    st.session_state.round_start_time = None 
+    st.session_state.round_finished = False 
+
+    # Feedback initialization
+    st.session_state.correct = False
+    st.session_state.reveal_message = "" 
+    st.session_state.feedback_message = ""  
+
+    # User session variables
+    st.session_state.clear_guess = False # Reset guess input box when 
+    st.session_state.username = "" 
+    st.session_state.game_started = False  
 
 # =======================
 # STAGE 1: START SCREEN
