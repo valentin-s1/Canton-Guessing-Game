@@ -233,7 +233,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                 # Rerun the Streamlit app so the new hint is displayed immediately
                 st.rerun()
 
-                # Exit the loop since we found a suitable hint
+                # Exit the loop after we found a suitable hint
                 break
 
             # If no unused hint was found at this level, go one level easier and try again
