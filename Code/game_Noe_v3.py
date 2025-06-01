@@ -151,12 +151,12 @@ elif st.session_state.current_round < st.session_state.rounds:
                 normalized_guess = guess.strip().lower()
                 normalized_answer = current_canton.lower()
 
-                # Check exact match or fuzzy match ≥ 70%
+                # Check exact match or fuzzy match ≥ 85%
                 if normalized_guess == normalized_answer:
                     correct = True
                 else:
-                    similarity = fuzz.partial_ratio(normalized_guess, normalized_answer)
-                    correct = similarity >= 70
+                    similarity = fuzz.token_set_ratio(normalized_guess, normalized_answer)
+                    correct = similarity >= 85
 
                 if correct:
                     st.session_state.feedback_message = f"✅ Correct! You earned {st.session_state.pending_score} points."
@@ -201,7 +201,7 @@ elif st.session_state.current_round < st.session_state.rounds:
                         hint_found = True
                         st.rerun()
                         break
-                    # No hints found for current difficulty → try easier level
+                    # No hints found for current difficulty, try easier level
                     st.session_state.current_difficulty -= 1
 
                 if not hint_found:

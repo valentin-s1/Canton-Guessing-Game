@@ -1,2 +1,2 @@
 from rapidfuzz import fuzz
-print(fuzz.partial_ratio("Zurihc", "Zurich"))
+print(fuzz.partial_ratio("G", "Grison"))

@@ -14,7 +14,7 @@ This Python-based quiz game invites players to guess Swiss cantons based on vari
 - Each round, a hidden canton is randomly selected.
 - It starts with one hard hint (worth 10 points) when clicking "Next hint" the user gets an easier clue (each costs 1 point)
 - The player has 2 attempts and 45 seconds to guess
-- Input is checked ussing fuzzy matching (≥70% similarity is correct)
+- Input is checked ussing fuzzy matching (>85% similarity is correct)
 - Correct guesses earn the remaining points.
 - Wrong guesses reduce attempts or end the round.
 - Your score accumulates across rounds and at the end, your final score is shown.
